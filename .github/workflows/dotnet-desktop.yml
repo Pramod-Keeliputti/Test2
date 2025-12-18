@@ -47,12 +47,8 @@ jobs:
         # We pass the inputs into the test execution using Environment Variables 
         # or RunSettings. Ensure your 'Configuration.GetConfiguration()' can read these.
         run: |
-          dotnet test TestAuto.Core/Tests/Tests.csproj \
-          --logger "trx;LogFileName=TestReport.trx" \
-          -- \
-          Settings.BrowserName=${{ github.event.inputs.browser }} \
-          Settings.BrowserVersion=${{ github.event.inputs.browser_version }}
-
+          dotnet test TestAuto.Core/Tests/Tests.csproj --logger "trx;LogFileName=TestReport.trx" -- Settings.BrowserName=${{ github.event.inputs.browser }} Settings.BrowserVersion=${{ github.event.inputs.browser_version }}
+  
       - name: Test Report
         if: always()
             # FIXED: Changed 'test-report' to 'test-reporter'
