@@ -55,8 +55,9 @@ jobs:
 
       - name: Test Report
         if: always()
-        uses: dorny/test-report@v1
+            # FIXED: Changed 'test-report' to 'test-reporter'
+        uses: dorny/test-reporter@v1.9.1 
         with:
-          name: .NET Tests Results
-          path: "**/TestReport.trx"
-          reporter: dotnet-trx
+            name: .NET Tests Results
+            path: "**/TestReport.trx"
+            reporter: dotnet-trx
