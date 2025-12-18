@@ -1,0 +1,62 @@
+name: TestExecution
+
+on:
+  push:
+    branches: [main, Test]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: 'Select Browser'
+        required: true
+        default: 'chrome'
+        type: choice
+        options:
+          - chrome
+          - firefox
+          - edge
+      browser_version:
+        description: 'Browser Version (e.g. latest, 120.0)'
+        required: false
+        default: 'latest'
+        type: string
+
+jobs:
+  TestExecution:
+    name: Test cases execution
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: nuget restore
+        run: dotnet restore TestAuto.Core/TestAuto.Core.sln
+
+      - name: build the repo
+        run: dotnet build TestAuto.Core/Tests/Tests.csproj
+
+      - name: execute tests
+        continue-on-error: true
+        # We pass the inputs into the test execution using Environment Variables 
+        # or RunSettings. Ensure your 'Configuration.GetConfiguration()' can read these.
+        run: |
+          dotnet test TestAuto.Core/Tests/Tests.csproj \
+          --logger "trx;LogFileName=TestReport.trx" \
+          -- \
+          Settings.BrowserName=${{ github.event.inputs.browser }} \
+          Settings.BrowserVersion=${{ github.event.inputs.browser_version }}
+
+      - name: Test Report
+        if: always()
+        uses: dorny/test-report@v1
+        with:
+          name: .NET Tests Results
+          path: "**/TestReport.trx"
+          reporter: dotnet-trx
